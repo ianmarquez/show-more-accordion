@@ -21,7 +21,9 @@ class MyView1 extends PolymerElement {
 
   ready() {
     super.ready();
-    console.log(this.content);
+    setTimeout(() => {
+      this.content = 'I love how great I feel from these Nu Skin products. Everyone is shocked when I tell them my real age. Explore my site and checkout my favourite products that keep me feeling and looking young.';
+    }, 1000);
   }
 
   static get template() {
@@ -29,12 +31,13 @@ class MyView1 extends PolymerElement {
       <style include="shared-styles">
         :host {
           display: block;
-
           padding: 10px;
         }
       </style>
       <div class="card">
-        <ns-content-accordion content="[[ content ]]"/>
+        <div>[[ content ]]</div>
+        <hr/>
+        <ns-content-accordion content="{{ content }}"/>
       </div>
       `;
   }
@@ -42,8 +45,8 @@ class MyView1 extends PolymerElement {
   static get properties() {
     return {
       content: {
-        value:'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibu',
-        type: String
+        value: '',
+        type: String,
       }
     }
   }

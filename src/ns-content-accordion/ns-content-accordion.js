@@ -4,11 +4,28 @@ export class NsContentAccordion extends PolymerElement {
   ready() {
     super.ready();
     this.CLAMP_LIMIT = 200;
-    const [ shown, hidden ] = this.splitContent(this.content);
-    this.shown = shown;
-    this.hidden = hidden;
+    this.shown = this._getContent();
     this.activated = false;
     this.shouldClamp = this._shouldClamp();
+  }
+
+  _onContentChange(newVal) {
+    if (newVal) {
+      this.set('content', newVal);
+      this.shown = this._getContent();
+      this.activated = false;
+      this.shouldClamp = this._shouldClamp();
+    }
+  }
+
+  _getContent() {
+    if (!this.content) return;
+    const [ shown, hidden ] = this._splitContent(this.content);
+    if (this.activated) {
+      return shown + hidden;
+    } else {
+      return this.shouldClamp ? shown + '...' : shown;
+    }
   }
 
   _shouldClamp() {
@@ -18,14 +35,14 @@ export class NsContentAccordion extends PolymerElement {
     return false;
   }
 
-  splitContent(string) {
+  _splitContent(string) {
     if (!string) return [null, null];
     const shownContent = string.substring(0, this.CLAMP_LIMIT);
     const hiddenContent = string.substring(this.CLAMP_LIMIT);
     return [shownContent, hiddenContent];
   }
 
-  getClassName() {
+  _setClassName() {
     if (this.activated) {
       return this.className = 'closed';
     } else {
@@ -43,10 +60,9 @@ export class NsContentAccordion extends PolymerElement {
       .divider {
         position: absolute;
         bottom: 0px;
-        height: 50px;
+        height: 20px;
         width: 100%;
         text-align: center;
-        background-color: white;
         background: -moz-linear-gradient(top,  rgba(255,255,255,0) -10%, rgba(255,255,255,1) 100%);
         background: -webkit-linear-gradient(top,  rgba(255,255,255,0) -10%,rgba(255,255,255,1) 100%);
         background: linear-gradient(to bottom,  rgba(255,255,255,0) -10%,rgba(255,255,255,1) 100%);
@@ -74,17 +90,11 @@ export class NsContentAccordion extends PolymerElement {
       <div id="content">
         <span>[[shown]]</span>
         <template is="dom-if" if="[[shouldClamp]]">
-          <template is="dom-if" if="[[!activated]]">
-            <span>...</span> 
-            <div class="divider"></div>
-          </template>
-          <template is="dom-if" if="[[ activated ]]">
-            <span>[[hidden]]</span>
-          </template>
+          <div hidden$="[[ activated ]]" class="divider"></div>
         </template>
       </div>
-      <div style="text-align: center;">
-        <svg class$="[[ className ]]" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" on-click="onClick">
+      <div style="text-align: center;" hidden$="[[ !shouldClamp ]]">
+        <svg class$="[[ className ]]" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" on-click="_onClick">
           <path d="M18 11L13 17L8 11" stroke="#747474" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="13" cy="13" r="12.5" stroke="#747474"/>
         </svg>
@@ -93,16 +103,18 @@ export class NsContentAccordion extends PolymerElement {
     `
   }
 
-  onClick() {
-    this.className = this.getClassName();
+  _onClick() {
+    this.className = this._setClassName();
     this.activated = !this.activated;
+    this.shown = this._getContent();
   }
 
   static get properties() {
     return {
       content: {
         type: String, 
-        value: this.content
+        value: '',
+        observer: '_onContentChange'
       },
       shown: String,
       activated: Boolean,
@@ -111,7 +123,8 @@ export class NsContentAccordion extends PolymerElement {
       className: {
         type: String,
         value: 'closed'
-      }
+      },
+      fadeTo: String
     }
   }
 
